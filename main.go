@@ -2,26 +2,71 @@ package main
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
 	"os"
+	"os/exec"
+
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+
+	"encoding/json"
+	"log"
 )
 
-type model struct {
-	choices  []string         // items on the to-do list
-	cursor   int              // which to-do list item our cursor is pointing at
-	selected map[int]struct{} // which to-do items are selected
+// The data struct for the decoded data
+// Notice that all fields must be exportable!
+type Item struct {
+	Url_       string `json:"url"`
+	Title_     string `json:"title"`
+	Duration_  string `json:"duration"`
+	Thumbnail_ string `json:"thumbnail"`
 }
 
-func initialModel() model {
-	return model{
-		// Our to-do list is a grocery list
-		choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
-
-		// A map which indicates which choices are selected. We're using
-		// the  map like a mathematical set. The keys refer to the indexes
-		// of the `choices` slice, above.
-		selected: make(map[int]struct{}),
+func getVideosFromJSON() []list.Item {
+	content, err := os.ReadFile("./videos.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
 	}
+
+	var payload []Item
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		log.Fatal("Error during Unmarshal()", err)
+	}
+
+	items := []list.Item{}
+
+	for _, video := range payload {
+		items = append(items, video)
+	}
+
+	return items
+}
+
+func playVideo(url string) {
+	cmd := exec.Command("mpv", url)
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println(string(stdout))
+}
+
+var docStyle = lipgloss.NewStyle().Margin(1, 2)
+
+func (i Item) Title() string       { return i.Title_ }
+func (i Item) Description() string { return i.Url_ }
+func (i Item) Url() string         { return i.Url_ }
+func (i Item) Thumbnail() string   { return i.Thumbnail_ }
+func (i Item) Duration() string    { return i.Duration_ }
+func (i Item) FilterValue() string { return i.Title_ }
+
+type model struct {
+	list   list.Model
+	videos []list.Item
 }
 
 func (m model) Init() tea.Cmd {
@@ -32,66 +77,38 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
 			return m, tea.Quit
-
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-
-		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
-			}
-
-		case "enter", " ":
-			_, ok := m.selected[m.cursor]
+		case "Return", " ":
+			i, ok := m.list.SelectedItem().(Item)
 			if ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
+				playVideo(i.Url())
 			}
 		}
+	case tea.WindowSizeMsg:
+		h, v := docStyle.GetFrameSize()
+		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
-	return m, nil
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
 }
 
 func (m model) View() string {
-	// The header
-	s := "What should we buy at the market?\n\n"
-
-	// Iterate over our choices
-	for i, choice := range m.choices {
-
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Is this choice selected?
-		checked := " " // not selected
-		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected!
-		}
-
-		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
-	}
-
-	// The footer
-	s += "\nPress q to quit.\n"
-
-	// Send the UI for rendering
-	return s
+	return docStyle.Render(m.list.View())
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+
+	videos := getVideosFromJSON()
+
+	m := model{list: list.New(videos, list.NewDefaultDelegate(), 0, 0)}
+	m.list.Title = "Sezon 1"
+	p := tea.NewProgram(m, tea.WithAltScreen())
+
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Alas, there's been an error: %v", err)
+		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
 }
