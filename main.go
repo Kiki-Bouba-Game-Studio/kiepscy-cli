@@ -13,34 +13,62 @@ import (
 	"log"
 )
 
+type Season struct {
+	Name string 
+	Episodes []Episode
+}
+
 // The data struct for the decoded data
 // Notice that all fields must be exportable!
-type Item struct {
+type Episode struct {
 	Url_       string `json:"url"`
 	Title_     string `json:"title"`
 	Duration_  string `json:"duration"`
 	Thumbnail_ string `json:"thumbnail"`
 }
 
-func getVideosFromJSON() []list.Item {
+func (e Episode) Title() string       { return e.Title_ }
+func (e Episode) Description() string { return e.Url_ }
+func (e Episode) Url() string         { return e.Url_ }
+func (e Episode) Thumbnail() string   { return e.Thumbnail_ }
+func (e Episode) Duration() string    { return e.Duration_ }
+func (e Episode) FilterValue() string { return e.Title_ }
+
+func (s Season) Title() string { return s.Name}
+func (s Season) Description() string { return fmt.Sprintf("%d episodes", len(s.Episodes)) }
+func (s Season) FilterValue() string { return s.Name}
+
+type model struct {
+	list   list.Model
+	seasons []Season
+	episodes []Episode
+	state string
+	currentSeason int
+}
+
+func getSeasonsFromJSON() []Season {
 	content, err := os.ReadFile("./videos.json")
 	if err != nil {
 		log.Fatal("Error when opening file: ", err)
 	}
 
-	var payload []Item
+	var payload [][]Episode
 	err = json.Unmarshal(content, &payload)
 	if err != nil {
 		log.Fatal("Error during Unmarshal()", err)
 	}
 
-	items := []list.Item{}
 
-	for _, video := range payload {
-		items = append(items, video)
+	seasons := make([]Season, len(payload))
+	
+	for i, episodeList := range payload {
+		seasons[i] = Season{
+			Name: fmt.Sprintf("Season %d", i+1),
+			Episodes: episodeList,
+		}
 	}
 
-	return items
+	return seasons
 }
 
 func playVideo(url string) {
@@ -57,20 +85,27 @@ func playVideo(url string) {
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 
-func (i Item) Title() string       { return i.Title_ }
-func (i Item) Description() string { return i.Url_ }
-func (i Item) Url() string         { return i.Url_ }
-func (i Item) Thumbnail() string   { return i.Thumbnail_ }
-func (i Item) Duration() string    { return i.Duration_ }
-func (i Item) FilterValue() string { return i.Title_ }
-
-type model struct {
-	list   list.Model
-	videos []list.Item
-}
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+func initializeModel() model {
+	seasons := getSeasonsFromJSON()
+
+	items := make([]list.Item, len(seasons))
+	for i, season := range seasons {
+		items[i] = season
+	}
+
+	l := list.New(items, list.NewDefaultDelegate(), 30, 15)
+	l.Title = "Seasons"
+
+	return model{
+		state: "seasons",
+		seasons: seasons,
+		list: l,
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -79,11 +114,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
-		case "Return", " ":
-			i, ok := m.list.SelectedItem().(Item)
-			if ok {
-				playVideo(i.Url())
+		case "KeyEnter", " ":
+			if m.state == "seasons" {
+				selected, ok := m.list.SelectedItem().(Season)
+				if ok {
+					items := make([]list.Item, len(selected.Episodes))
+					for i, episode := range selected.Episodes {
+						items[i] = episode
+					}
+					episodeList := list.New(items, list.NewDefaultDelegate(), 30, 15)
+					episodeList.Title = selected.Name
+
+					m.state = "episodes"
+					m.list = episodeList
+					m.currentSeason = m.list.Index()
+				}
+			} else if m.state == "episodes" {
+				selected, ok := m.list.SelectedItem().(Episode)
+				if ok {
+					playVideo(selected.Url())
+				}
 			}
+	case "backspace":
+		if m.state == "episodes" {
+			items := make([]list.Item, len(m.seasons))
+			for i, season := range m.seasons {
+				items[i] = season
+			}
+
+			seasonList := list.New(items, list.NewDefaultDelegate(), 30, 15)
+			seasonList.Title = "Seasons"
+
+			m.state = "seasons"
+			m.list = seasonList
+		}
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -100,11 +164,7 @@ func (m model) View() string {
 }
 
 func main() {
-
-	videos := getVideosFromJSON()
-
-	m := model{list: list.New(videos, list.NewDefaultDelegate(), 0, 0)}
-	m.list.Title = "Sezon 1"
+	m := initializeModel()
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {

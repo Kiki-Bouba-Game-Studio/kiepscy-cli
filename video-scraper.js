@@ -11,4 +11,3 @@ videoDivs.forEach(videoDiv => {
     });
 
 console.log(videos)
-
