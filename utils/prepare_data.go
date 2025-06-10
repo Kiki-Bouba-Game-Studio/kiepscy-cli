@@ -80,13 +80,13 @@ func read_videos_from_file() []Video {
 
 func normalizeString(input string) string {
 	replacer := strings.NewReplacer(
-		"–", "-", // Zamiana półpauzy na myślnik
-		"—", "-", // Zamiana pauzy na myślnik
-		"„", `"`, // Zamiana cudzysłowów
+		"–", "-",
+		"—", "-",
+		"„", `"`,
 		"”", `"`,
 	)
 	normalized := replacer.Replace(input)
-	return strings.ToLower(strings.TrimSpace(normalized)) // Zamiana na małe litery i usunięcie spacji
+	return strings.ToLower(strings.TrimSpace(normalized))
 }
 
 func main() {
@@ -102,7 +102,6 @@ func main() {
 			highestScore := -1
 			for _, video := range videos {
 				score := fuzzy.RankMatch(normalizeString(video.Title_), normalizeString(episode.Title))
-				// fmt.Printf("%s, %s, score: %d, highestScore: %d\n", video.Title_, episode.Title, score, highestScore)
 				if score > highestScore {
 					highestScore = score
 					bestMatch = video
