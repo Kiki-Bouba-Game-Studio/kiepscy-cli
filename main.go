@@ -48,7 +48,7 @@ type model struct {
 }
 
 func getSeasonsFromJSON() []Season {
-	content, err := os.ReadFile("./utils/seasons_with_videos.json")
+	content, err := os.ReadFile("./utils/seasons.json")
 	if err != nil {
 		log.Fatal("Error when opening file: ", err)
 	}
