@@ -104,7 +104,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
-		case "KeyEnter", " ":
+		case "enter", " ":
 			if m.state == "seasons" {
 				selected, ok := m.list.SelectedItem().(Season)
 				if ok {
@@ -117,7 +117,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					m.state = "episodes"
 					m.list = episodeList
-					// m.currentSeason = m.list.Index()
 				}
 			} else if m.state == "episodes" {
 				selected, ok := m.list.SelectedItem().(Episode)
@@ -137,6 +136,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				m.state = "seasons"
 				m.list = seasonList
+				return m, nil
+			}
+		case "esc":
+			if m.state == "episodes" {
+				items := make([]list.Item, len(m.seasons))
+				for i, season := range m.seasons {
+					items[i] = season
+				}
+				seasonList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
+				seasonList.Title = "Seasons"
+				m.state = "seasons"
+				m.list = seasonList
+				return m, nil
+			} else if m.state == "seasons" {
+				return m, tea.Quit
 			}
 		}
 	case tea.WindowSizeMsg:
