@@ -63,15 +63,27 @@ func getSeasonsFromJSON() []Season {
 }
 
 func playVideo(url string) {
+
 	cmd := exec.Command("mpv", url)
 	stdout, err := cmd.Output()
 
 	if err != nil {
 		fmt.Println(err.Error())
+
+		logfile, err := os.CreateTemp("", "kiepscy-cli-mpv-*.log")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		logfile.Write(stdout)
+
+		if err := logfile.Close(); err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Logs can be found in ", logfile.Name())
 		return
 	}
-
-	fmt.Println(string(stdout))
 }
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)

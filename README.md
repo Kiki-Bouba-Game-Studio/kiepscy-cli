@@ -44,23 +44,13 @@ For the project to function correctly, you'll need the following dependencies:
     cd kiepscy-cli
     ```
 
-2.  **Prepare video data:**
-    Ensure you have a `seasons.json` file (containing the season and episode data structure) located in the `utils/` directory within your project's root. Example path: `kiepscy-cli/utils/seasons.json`.
-
-3.  **Initialize Go module and fetch dependencies:**
-    ```bash
-    go mod init kiepscy-cli # Or `go mod init github.com/Kiki-Bouba-Game-Studio/kiepscy-cli`
-    go mod tidy
-    ```
-    The `go mod tidy` command will automatically download all required dependencies defined in your `main.go` file.
-
-4.  **Build the application:**
+2.  **Build the application:**
     ```bash
     go build
     ```
     This will compile the project and create an executable file named `kiepscy-cli` (or `kiepscy-cli.exe` on Windows) in the current directory.
 
-5.  **Run the application:**
+3.  **Run the application:**
     ```bash
     ./kiepscy-cli # On Linux/macOS
     .\kiepscy-cli.exe # On Windows
