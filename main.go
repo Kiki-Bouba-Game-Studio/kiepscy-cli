@@ -59,16 +59,6 @@ func getSeasonsFromJSON() []Season {
 		log.Fatal("Error during Unmarshal()", err)
 	}
 
-	// seasons := make([]Season, len(payload))
-
-	// for i, episodeList := range payload {
-	// 	seasons[i] = Season{
-	// 		Name:     fmt.Sprintf("Season %d", i+1),
-	// 		Episodes: episodeList,
-	// 	}
-	// }
-
-	// return seasons
 	return payload
 }
 
@@ -122,12 +112,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					for i, episode := range selected.Episodes {
 						items[i] = episode
 					}
-					episodeList := list.New(items, list.NewDefaultDelegate(), 30, 15)
+					episodeList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
 					episodeList.Title = selected.Name
 
 					m.state = "episodes"
 					m.list = episodeList
-					m.currentSeason = m.list.Index()
+					// m.currentSeason = m.list.Index()
 				}
 			} else if m.state == "episodes" {
 				selected, ok := m.list.SelectedItem().(Episode)
@@ -142,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				for i, season := range m.seasons {
 					items[i] = season
 				}
-				seasonList := list.New(items, list.NewDefaultDelegate(), 30, 15)
+				seasonList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
 				seasonList.Title = "Seasons"
 
 				m.state = "seasons"
