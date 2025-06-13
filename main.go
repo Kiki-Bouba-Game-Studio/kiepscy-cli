@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	_ "embed"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -47,14 +48,11 @@ type model struct {
 	currentSeason int
 }
 
+//go:embed database/seasons.json
+var content []byte
 func getSeasonsFromJSON() []Season {
-	content, err := os.ReadFile("./database/seasons.json")
-	if err != nil {
-		log.Fatal("Error when opening file: ", err)
-	}
-
 	var payload []Season
-	err = json.Unmarshal(content, &payload)
+	err := json.Unmarshal(content, &payload)
 	if err != nil {
 		log.Fatal("Error during Unmarshal()", err)
 	}
