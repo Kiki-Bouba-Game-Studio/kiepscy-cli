@@ -4,20 +4,20 @@
 ![Bubble Tea](https://img.shields.io/badge/Bubble%20Tea-Terminal%20UI-purple.svg?style=flat-square&logo=go)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)
 
-## Play it again, Ferdynand!
+## W tym kraju nie ma pracy dla ludzi z moim wykształceniem 🍺
 
 `kiepscy-cli` is a small, terminal-based program written in Go, utilizing the [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lipgloss](https://github.com/charmbracelet/lipgloss) libraries. It was created as a fun and educational project (completed in just two evenings!) to grasp the basics of Go and build interactive terminal user interfaces.
 
 So, what does it do? It allows you to play any episode of the iconic Polish TV series **"Świat według Kiepskich"** directly from your terminal!
 
-## Features
+## Panie! Afera jest! 💥 (Features)
 
 * **Season Browse:** An intuitive list of all available seasons.
 * **Episode Listing:** After selecting a season, you'll see a list of all episodes within that season.
 * **Fuzzy Finding:** Quickly search for seasons and episodes by typing partial names.
 * **Terminal Playback:** Select an episode, and it will be played using the external `mpv` media player.
 
-## Dependencies
+## Wie pan, to nie są tanie rzeczy! 💰 (Dependencies)
 
 For the project to function correctly, you'll need the following dependencies:
 
@@ -36,7 +36,7 @@ For the project to function correctly, you'll need the following dependencies:
     * **Linux (Debian/Ubuntu):** `sudo apt-get install mpv`
     * **Windows:** Download the installer from `mpv.io` or use a package manager (e.g., `scoop install mpv` / `choco install mpv`).
 
-## Installation and Usage
+## No i gitara! 🎸 (Installation and Usage)
 
 1.  **Clone the repository:**
     ```bash
@@ -60,7 +60,7 @@ For the project to function correctly, you'll need the following dependencies:
     go run main.go
     ```
 
-## Controls
+## Co jest, kurde? Noc jest, kurde! No idę, kurde! 🌛 (Controls)
 
 The program's interface is intuitive and keyboard-driven:
 
@@ -74,6 +74,6 @@ The program's interface is intuitive and keyboard-driven:
 * **Any text input:** Typing activates fuzzy finding, filtering the current list.
 * **`Ctrl+C`:** Immediately exit the application.
 
-## License
+## Albo jutro się spotkamy wiesz gdzie. U adwokata! 💼 (License)
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
