@@ -1,16 +1,16 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
-	_ "embed"
 
+	"encoding/json"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"encoding/json"
 	"log"
 )
 
@@ -50,6 +50,7 @@ type model struct {
 
 //go:embed database/seasons.json
 var content []byte
+
 func getSeasonsFromJSON() []Season {
 	var payload []Season
 	err := json.Unmarshal(content, &payload)
@@ -60,9 +61,51 @@ func getSeasonsFromJSON() []Season {
 	return payload
 }
 
-func playVideo(url string) {
+func (m *model) createSeasonsList() {
+	items := make([]list.Item, len(m.seasons))
+	for i, season := range m.seasons {
+		items[i] = season
+	}
+	m.list.SetItems(items)
+	m.list.ResetFilter()
+	m.list.Title = "Seasons"
+	m.list.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			key.NewBinding(
+				key.WithKeys("enter", " "),
+				key.WithHelp("enter/space", "select"),
+			),
+		}
+	}
+	m.state = "seasons"
+}
 
-	cmd := exec.Command("mpv", url)
+func (m *model) createEpisodesList(season Season) {
+	items := make([]list.Item, len(season.Episodes))
+	for i, episode := range season.Episodes {
+		items[i] = episode
+	}
+	m.list.SetItems(items)
+	m.list.ResetFilter()
+	m.list.Title = season.Name
+	m.list.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			key.NewBinding(
+				key.WithKeys("enter", " "),
+				key.WithHelp("enter/space", "select"),
+			),
+			key.NewBinding(
+				key.WithKeys("backspace"),
+				key.WithHelp("backspace", "back"),
+			),
+		}
+	}
+	m.state = "episodes"
+}
+
+func playVideo(url string, title string) {
+
+	cmd := exec.Command("mpv", url, "--force-media-title="+title)
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -100,7 +143,6 @@ func initializeModel() model {
 
 	l := list.New(items, list.NewDefaultDelegate(), 30, 15)
 	l.Title = "Seasons"
-
 	return model{
 		state:   "seasons",
 		seasons: seasons,
@@ -111,53 +153,29 @@ func initializeModel() model {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if m.list.FilterState() == list.Filtering {
+			var cmd tea.Cmd
+			m.list, cmd = m.list.Update(msg)
+			return m, cmd
+		}
+
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "enter", " ":
-			if m.state == "seasons" {
-				selected, ok := m.list.SelectedItem().(Season)
-				if ok {
-					items := make([]list.Item, len(selected.Episodes))
-					for i, episode := range selected.Episodes {
-						items[i] = episode
-					}
-					episodeList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
-					episodeList.Title = selected.Name
-
-					m.state = "episodes"
-					m.list = episodeList
+			switch m.state {
+			case "seasons":
+				if selected, ok := m.list.SelectedItem().(Season); ok {
+					m.createEpisodesList(selected)
 				}
-			} else if m.state == "episodes" {
-				selected, ok := m.list.SelectedItem().(Episode)
-				if ok {
-					playVideo(selected.Url())
+			case "episodes":
+				if selected, ok := m.list.SelectedItem().(Episode); ok {
+					playVideo(selected.Url(), selected.Title_)
 				}
 			}
 		case "backspace":
 			if m.state == "episodes" {
-				items := make([]list.Item, len(m.seasons))
-				fmt.Println(len(m.seasons))
-				for i, season := range m.seasons {
-					items[i] = season
-				}
-				seasonList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
-				seasonList.Title = "Seasons"
-
-				m.state = "seasons"
-				m.list = seasonList
-				return m, nil
-			}
-		case "esc":
-			if m.state == "episodes" {
-				items := make([]list.Item, len(m.seasons))
-				for i, season := range m.seasons {
-					items[i] = season
-				}
-				seasonList := list.New(items, list.NewDefaultDelegate(), m.list.Width(), m.list.Height())
-				seasonList.Title = "Seasons"
-				m.state = "seasons"
-				m.list = seasonList
+				m.createSeasonsList()
 				return m, nil
 			} else if m.state == "seasons" {
 				return m, tea.Quit
