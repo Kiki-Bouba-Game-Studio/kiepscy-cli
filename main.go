@@ -61,6 +61,7 @@ func getSeasonsFromJSON() []Season {
 	return payload
 }
 
+
 func (m *model) createSeasonsList() {
 	items := make([]list.Item, len(m.seasons))
 	for i, season := range m.seasons {
@@ -102,6 +103,7 @@ func (m *model) createEpisodesList(season Season) {
 	}
 	m.state = "episodes"
 }
+
 
 func playVideo(url string, title string) {
 
