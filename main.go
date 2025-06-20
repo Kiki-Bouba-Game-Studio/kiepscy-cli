@@ -1,10 +1,10 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
-	_ "embed"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -50,6 +50,7 @@ type model struct {
 
 //go:embed database/seasons.json
 var content []byte
+
 func getSeasonsFromJSON() []Season {
 	var payload []Season
 	err := json.Unmarshal(content, &payload)
@@ -60,9 +61,9 @@ func getSeasonsFromJSON() []Season {
 	return payload
 }
 
-func playVideo(url string) {
+func playVideo(url string, title string) {
 
-	cmd := exec.Command("mpv", url)
+	cmd := exec.Command("mpv", url, "--force-media-title="+title)
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -131,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if m.state == "episodes" {
 				selected, ok := m.list.SelectedItem().(Episode)
 				if ok {
-					playVideo(selected.Url())
+					playVideo(selected.Url(), selected.Title_)
 				}
 			}
 		case "backspace":
