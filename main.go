@@ -116,6 +116,7 @@ func (m *model) createEpisodesList(season Season) {
 	m.state = "episodes"
 }
 
+
 func playVideo(url string, title string) {
 
 	cmd := exec.Command("mpv", url, "--force-media-title="+title)
