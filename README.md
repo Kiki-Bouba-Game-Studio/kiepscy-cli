@@ -6,9 +6,9 @@
 
 ## W tym kraju nie ma pracy dla ludzi z moim wykształceniem 🍺
 
-`kiepscy-cli` is a small, terminal-based program written in Go, utilizing the [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lipgloss](https://github.com/charmbracelet/lipgloss) libraries. It was created as a fun and educational project (completed in just two evenings!) to grasp the basics of Go and build interactive terminal user interfaces.
+`kiepscy-cli` is a small, terminal-based program written in Go, utilizing the [Bubble Tea](https://github.com/charmbracelet/bubbletea) and [Lipgloss](https://github.com/charmbracelet/lipgloss) libraries. It allows you to play any episode of the iconic Polish TV series **"Świat według Kiepskich"** directly from your terminal!
 
-So, what does it do? It allows you to play any episode of the iconic Polish TV series **"Świat według Kiepskich"** directly from your terminal!
+![Peek 2025-06-23 20-57](https://github.com/user-attachments/assets/aa55ac92-5187-42bf-9495-5c455e4a9425)
 
 ## Panie! Afera jest! 💥 (Features)
 
