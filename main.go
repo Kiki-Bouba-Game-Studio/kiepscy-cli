@@ -45,7 +45,7 @@ type model struct {
 	seasons       []Season
 	episodes      []Episode
 	state         string
-	currentSeason int
+	currentSeason *Season
 }
 
 //go:embed database/seasons.json
@@ -61,6 +61,16 @@ func getSeasonsFromJSON() []Season {
 	return payload
 }
 
+func (m *model) selectPreviousSeason() {
+	if m.currentSeason != nil {
+		for i, season := range m.seasons {
+			if season.Name == m.currentSeason.Name {
+				m.list.Select(i)
+				break
+			}
+		}
+	}
+}
 
 func (m *model) createSeasonsList() {
 	items := make([]list.Item, len(m.seasons))
@@ -70,6 +80,7 @@ func (m *model) createSeasonsList() {
 	m.list.SetItems(items)
 	m.list.ResetFilter()
 	m.list.Title = "Seasons"
+	m.selectPreviousSeason()
 	m.list.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			key.NewBinding(
@@ -82,6 +93,7 @@ func (m *model) createSeasonsList() {
 }
 
 func (m *model) createEpisodesList(season Season) {
+	m.currentSeason = &season
 	items := make([]list.Item, len(season.Episodes))
 	for i, episode := range season.Episodes {
 		items[i] = episode
