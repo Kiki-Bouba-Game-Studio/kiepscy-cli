@@ -68,10 +68,10 @@ The program's interface is intuitive and keyboard-driven:
 * **`Enter` / `Space`:**
     * When on the season list: Selects a season and moves to its episode list.
     * When on the episode list: Plays the selected episode using `mpv`.
-* **`Backspace` / `Esc`:**
+* **`Backspace`:**
     * When on the episode list: Go back to the season list.
     * When on the season list: Exit the application.
-* **Any text input:** Typing activates fuzzy finding, filtering the current list.
+* **`/`:** activates fuzzy finding, filtering the current list.
 * **`Ctrl+C`:** Immediately exit the application.
 
 ## Albo jutro się spotkamy wiesz gdzie. U adwokata! 💼 (License)
