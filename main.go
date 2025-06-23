@@ -87,6 +87,10 @@ func (m *model) createSeasonsList() {
 				key.WithKeys("enter", " "),
 				key.WithHelp("enter/space", "select"),
 			),
+			key.NewBinding(
+				key.WithKeys("s"),
+				key.WithHelp("s", "search all"),
+			),
 		}
 	}
 	m.state = "seasons"
@@ -116,6 +120,18 @@ func (m *model) createEpisodesList(season Season) {
 	m.state = "episodes"
 }
 
+func (m *model) searchGlobally() {
+	var allEpisodes []list.Item
+	for _, season := range m.seasons {
+		for _, episode := range season.Episodes {
+			allEpisodes = append(allEpisodes, episode)
+		}
+	}
+	m.list.SetItems(allEpisodes)
+	m.list.ResetFilter()
+	m.list.Title = "Global Search"
+	m.state = "global_search"
+}
 
 func playVideo(url string, title string) {
 
@@ -157,11 +173,13 @@ func initializeModel() model {
 
 	l := list.New(items, list.NewDefaultDelegate(), 30, 15)
 	l.Title = "Seasons"
-	return model{
+	m := model{
 		state:   "seasons",
 		seasons: seasons,
 		list:    l,
 	}
+	m.createSeasonsList()
+	return m
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -176,6 +194,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "s":
+			if m.state == "seasons" {
+				m.searchGlobally()
+				return m, nil
+			}
 		case "enter", " ":
 			switch m.state {
 			case "seasons":
@@ -186,9 +209,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if selected, ok := m.list.SelectedItem().(Episode); ok {
 					playVideo(selected.Url(), selected.Title_)
 				}
+			case "global_search":
+				if selected, ok := m.list.SelectedItem().(Episode); ok {
+					playVideo(selected.Url(), selected.Title_)
+				}
 			}
 		case "backspace":
-			if m.state == "episodes" {
+			if m.state == "episodes" || m.state == "global_search" {
 				m.createSeasonsList()
 				return m, nil
 			} else if m.state == "seasons" {
