@@ -21,12 +21,6 @@
 
 For the project to function correctly, you'll need the following dependencies:
 
-### Go Modules:
-
-* `github.com/charmbracelet/bubbletea`
-* `github.com/charmbracelet/bubbles`
-* `github.com/charmbracelet/lipgloss`
-
 ### External Video Player:
 
 * `mpv` - A lightweight and versatile media player. It must be installed on your system and accessible within your `PATH` environment variable.
@@ -40,7 +34,7 @@ For the project to function correctly, you'll need the following dependencies:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/Kiki-Bouba-Game-Studio/kiepscy-cli.git # Change to your repository URL
+    git clone https://github.com/Kiki-Bouba-Game-Studio/kiepscy-cli.git
     cd kiepscy-cli
     ```
 
