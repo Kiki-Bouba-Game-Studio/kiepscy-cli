@@ -66,6 +66,7 @@ The program's interface is intuitive and keyboard-driven:
     * When on the episode list: Go back to the season list.
     * When on the season list: Exit the application.
 * **`/`:** activates fuzzy finding, filtering the current list.
+* **`s`:** activates global search, allowing to filter all episodes.
 * **`Ctrl+C`:** Immediately exit the application.
 
 ## Albo jutro się spotkamy wiesz gdzie. U adwokata! 💼 (License)
